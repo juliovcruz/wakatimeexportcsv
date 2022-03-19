@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class WakaApplication
 
 fun main(args: Array<String>) {
-	runApplication<WakaApplication>(*args)
+	runApplication<WakaApplication>(*args) 
 }
