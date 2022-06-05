@@ -7,6 +7,7 @@ import com.juliocruz.wakaexportcsv.request.Struct
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 
 @RestController
 class Endpoint {
@@ -21,7 +22,7 @@ class Endpoint {
         )
 
         request.days.forEach {
-            val date = it.date.split("-").let { "${it[2]}/${it[1]}/${it[0]}" }
+            val date = it.date.split("-").let { "${it[1]}/${it[2]}/${it[0]}" }
 
             csvExport(structs = it.editors, date = date, exceptNames = listOf("Zsh"), fileExport = fileExports.first { it.category == Category.EDITORS })
             csvExport(structs = it.machines, date = date, fileExport = fileExports.first { it.category == Category.MACHINES })
@@ -41,18 +42,23 @@ class Endpoint {
         fileExport: FileExport
     ) {
         structs.forEach {
-            val minutes = (it.hours * 60) + it.minutes
+            try {
+                val minutes = (it.hours * 60) + it.minutes
+                val hours = minutes.toDouble() / 60
 
-            if (minutes == 0 || exceptNames.equals(it.name)) return@forEach
+                if (minutes == 0 || exceptNames.equals(it.name)) return@forEach
 
-            val data = listOf(
-                date,
-                it.name,
-                minutes,
-                it.text
-            )
+                val data = listOf(
+                    date,
+                    it.name,
+                    hours,
+                    it.text
+                )
 
-            fileExport.csvPrinter.printRecord(data);
+                fileExport.csvPrinter.printRecord(data);
+            } catch (exception: Throwable) {
+                println(exception)
+            }
         }
     }
 }
